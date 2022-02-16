@@ -47,10 +47,9 @@ class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      history: [{ squares: Array(9).fill(null) }],
+      history: [{ squares: Array(9).fill(null), clickedSquare: [0, 0] }],
       stepNumber: 0,
       xIsNext: true,
-      checkboxState: true,
     };
   }
 
@@ -58,7 +57,6 @@ class Game extends React.Component {
     this.setState({
       stepNumber: step,
       xIsNext: step % 2 === 0,
-      checkboxState: false,
     });
   }
 
@@ -71,30 +69,37 @@ class Game extends React.Component {
     }
     squares[i] = this.state.xIsNext ? "X" : "O";
     this.setState({
-      history: history.concat([{ squares: squares }]),
+      history: history.concat([
+        {
+          squares: squares,
+          clickedSquare: [Math.floor((i % 3) + 1), Math.floor(i / 3 + 1)],
+        },
+      ]),
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext,
     });
   }
 
   render() {
+    const active = {
+      fontWeight: "bold",
+    };
+    const inactive = { fontWeight: "normal" };
+
     const history = this.state.history;
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
 
     const moves = history.map((step, move) => {
+      const clickedSquare = step.clickedSquare;
       const desc = move
-        ? "Przejdź do ruchu #" + move
+        ? `Przejdź do ruchu #${move} - (${clickedSquare[0]},${clickedSquare[1]})`
         : "Przejdź na początek gry";
       return (
         <li key={move}>
           <button
+            style={this.state.stepNumber === move ? active : inactive}
             onClick={() => this.jumpTo(move)}
-            style={
-              this.state.checkboxState
-                ? { fontWeight: "normal" }
-                : { fontWeight: "bold" }
-            }
           >
             {desc}
           </button>
